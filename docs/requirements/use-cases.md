@@ -4919,3 +4919,91 @@ File names include document type and team identifier.
 **Related Use Cases:** UC-AI-critique: Request a critique from the critique assistant; UC-AI-consult-project-assistant: Consult the project assistant; UC-CFG-configure-review-criteria: Configure the cross-document review criteria for a course section; UC-VAL-run-validation: Run validation (ReqLint) on the current document; UC-AI-review-proposal: Review and accept or reject an assistant proposal; UC-DOC-edit-document: Edit a section-based requirement document; UC-DOC-edit-use-case: Edit a use case.
 **Assumptions:**
 **Open Issues:**
+
+### **UC-INS-notify-nonsubmission: Notify non-submitters **
+
+**UC ID and Name:** UC-INS-notify-nonsubmission: Instructor notifies students who have not submitted weekly activity or evaluations
+**Created By:** Alexa Mercado
+**Date Created:** 9/28/2026
+**Primary Actor:** Instructor
+**Secondary Actors:** Gmail system
+**Trigger:** Instructor requests the list of students in one of the instructor's course sections who have not submitted either weekly activity reports or peer evaluations for a selected week.
+**Description:** The instructor identifies students who have not completed a weekly activity report or peer evaluation and notify eligible non-submitters, so that they can submit while submission remains possible.
+
+**Preconditions:**
+- PRE-1. The instructor is logged into the system.
+- PRE-2. The instructor is assigned to the selcted course section (BR-section-scoped-access).
+
+**Postconditions:**
+- POST-1. The system has displayed the selected week's non-submitters and each student's reminder eligibility.
+- POST-2. For every student selected and eligible for notification, the system has attempted one reminder email and recorded the outcome.
+- POST-3. A failure to send one email does not prevent attempts for the remaining selected students.
+
+
+**Main Success Scenario:**
+1. The instructor selects a course section, a week, and one submission type: weekly activity report or peer evaluation
+2. The system verifies the instructor's access to the selected course section and identifies only students enrolled in that course section who have not completed the selected work (BR-reminder-eligibility).
+3. The system displays the non-submitter list and each student's reminder eligibility according to the "non-submitter list" in the Associated information.
+4. The instructor selects one or more eligible students and indicates to send reminders.
+5. The system displays the selected students and asks the instructor to confirm.
+6. The instructor confirms.
+7. The system sends one reminder email to each selected student through the Gmail system.
+8. The system records the result of each attempt and displays a summary to the instructor.
+9. Use case ends.
+
+**Extensions:**
+- **1a. The selected peer evaluation week is not an active week**:
+- 1a1. The system does not display non-submitters or allow reminders for that week and informs the instructor that peer evaluations apply only to the course section’s active weeks (BR-active-weeks).
+  - 1a2. Use case ends.
+- **1b. The selected peer-evaluation submission window has closed:**
+  - 1b1. The system does not display non-submitters or allow reminders for that week and informs the instructor that the peer-evaluation submission window has closed(BR-evaluation-submission-window, BR-reminder-eligibility).
+  - 1b2. Use case ends.
+- **1c. The student is not assigned to a team:**
+  - 1c1. The system displays the student as a non-submitter but does not allow the instructor to select the student for a reminder because the student cannot submit peer evaluations or WAR until assigned to a team (BR-team-assignment-required, BR-reminder-eligibility).
+  - 1c2. The system continues at step 3 of the normal flow.
+- **1d. A student previously added at least one WAR, but later deleted it:**
+  - 1d1. The system treats the student as a non-submitter because no current completion exists for the selected work type and week (BR-reminder-eligibility).
+  - 1d2. The system continues at step 3 of the normal flow.
+
+- **3a. No non-submitters are found:**
+  - 3a1. The system informs the instructor that all eligible students have completed the selected work for the selected week.
+  - 3a2. Use case ends.
+
+- **4a. A selected student has already received a reminder for the selected work and week:**
+  - 4a1. The system does not allow the instructor to select that student for another reminder (BR-reminder-frequency-limit).
+  - 4a2. The instructor selects other eligible students or cancels the use case.
+
+- **5a. The instructor chooses to modify the selected students:**
+  - 5a1. The system returns the instructor to the non-submitter list.
+  - 5a2. The instructor modifies the selected students and returns to step 4 of the normal flow.
+
+- **6a. The instructor cancels the reminder:**
+  - 6a1. The system sends no reminders.
+  - 6a2. Use case ends.
+
+- **7a. The Gmail system rejects an email address or cannot send a reminder:**
+  - 7a1. The system records the failed attempt, continues sending reminders to the remaining selected students, and reports the failure in the summary (BR-reminder-frequency-limit).
+  - 7a2. The system continues at step 7 of the normal flow.
+
+
+**Priority:** High
+**Frequency of Use:** Weekly ; an instructor may use it during a weekly reporting or peer-evaluation week.
+**Business Rules:** BR-section-scoped-access, BR-team-assignment-required, BR-active-weeks, BR-evaluation-submission-window, BR-reminder-eligibility, BR-reminder-frequency-limit
+
+**Associated Information:**
+Non-submitter list: Student name, team, selected work type, selected week, completion status, and reminder eligibility with the reason when ineligible.
+
+Privacy: The list is visible only to the authorized instructor. Each reminder identifies only the recipient’s own outstanding work and does not disclose another student’s status.
+
+Reminder content: The email identifies the outstanding work type, week, and applicable due information.
+Failure handling: If a systemic failure occurs before any attempt, the system sends no reminders and informs the instructor. If it occurs after one or more attempts, the system retains and reports the known result of each attempt.
+
+- **Failure handling:** If an unexpected system failure occurs before any reminder email is attempted, the system sends no reminders and records no reminder attempts. If a failure occurs after one or more attempts, the system preserves and reports the known result of each attempt; successfully accepted emails are not rolled back. If the Gmail system’s outcome for an attempted email is unknown, such as after a timeout, the system records the attempt as unknown and informs the instructor rather than reporting that the email was sent.
+
+**Assumptions:**
+
+- Each student has an email address associated with the student’s Project Pulse account.
+- The Gmail system is configured to accept reminder-email requests from Project Pulse.
+- The system’s current date and time are authoritative when determining whether a peer-evaluation submission window is open.
+- Reminder-attempt records are retained long enough for the system to enforce BR-reminder-frequency-limit.
+**Open Issues:**

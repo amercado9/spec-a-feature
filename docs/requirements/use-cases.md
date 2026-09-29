@@ -4984,6 +4984,9 @@ File names include document type and team identifier.
 - **7a. The Gmail system rejects an email address or cannot send a reminder:**
   - 7a1. The system records the failed attempt, continues sending reminders to the remaining selected students, and reports the failure in the summary (BR-reminder-frequency-limit).
   - 7a2. The system continues at step 7 of the normal flow.
+  - **7b. A selected student is no longer eligible for a reminder:**
+  - 7b1. The system does not send a reminder to that student, does not record a reminder attempt, and identifies the student as skipped with the reason in the outcome summary (BR-reminder-eligibility).
+  - 7b2. The system continues at step 7 of the normal flow for the remaining selected students.
 
 
 **Priority:** High
